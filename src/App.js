@@ -1,17 +1,20 @@
 import Target from './components/Target'
 import {useCallback, useEffect, useState} from "react";
-import Toolbar from "./components/Toolbar";
+import Header from "./components/Header";
 import {v4 as uuidv4} from 'uuid';
 import Field from "./components/Field";
 import ResultModal from "./components/ResultModal";
+import Explosion from "./components/Explosion";
 
 const liveTime = 2500
 
 const App = () => {
 
+    const [isStarted, setIsStarted] = useState(false)
+
     const [targets, setTargets] = useState([])
 
-    const [isStarted, setIsStarted] = useState(false)
+    const [explosions, setExplosions] = useState([])
 
     const [disableTime, setDisableTime] = useState(0)
 
@@ -25,6 +28,8 @@ const App = () => {
 
     const onStart = useCallback(() => {
         setIsStarted(true)
+        setTotalTargetCount(0)
+        setClickedTargetCount(0)
         setDisableTime(5)
     }, [])
 
@@ -35,9 +40,11 @@ const App = () => {
         setIsResultModalOpened(true)
     }, [intervalIds])
 
+    const onResultModalClose = useCallback(() => {
+        setIsResultModalOpened(false)
+    }, [])
 
     useEffect(() => {
-
         const intervalId = setInterval(() => {
                 if (isStarted) {
                     const id = uuidv4()
@@ -74,23 +81,38 @@ const App = () => {
     }, [])
 
     const onTargetClick = useCallback((targetId) => {
+        const {position} = targets.find((target) => target.id === targetId);
         setTargets((prevTargets) => prevTargets.filter(({id}) => targetId !== id))
         setIntervalIds((prevState) => prevState.filter(({id}) => targetId !== id))
         setClickedTargetCount(prevState => prevState + 1)
+        setExplosions(prevState => [...prevState, {
+            id: uuidv4(),
+            position
+        }])
+    }, [targets])
+
+    const onDestroyExplosion = useCallback((explosionId) => {
+        setExplosions((prevTargets) => prevTargets.filter(({id}) => explosionId !== id))
     }, [])
 
     return (
         <div className="App">
-            <Toolbar isStarted={isStarted} onFinish={onFinish} onStart={onStart} disableTime={disableTime}/>
+            <Header isStarted={isStarted} onFinish={onFinish} onStart={onStart} disableTime={disableTime}/>
             <Field>
                 {targets.map(({id, position}) => (
                     <Target
-                    key={id} position={position} id={id}
-                    onDestroyTarget={onDestroyTarget} liveTime={liveTime}
-                    onClick={onTargetClick}/>
+                        key={id} position={position} id={id}
+                        onDestroyTarget={onDestroyTarget} liveTime={liveTime}
+                        onClick={onTargetClick}/>
+                ))}
+                {explosions.map(({id, position}) => (
+                    <Explosion key={id} position={position} onDestroyExplosion={onDestroyExplosion}/>
                 ))}
             </Field>
-            {isResultModalOpened && <ResultModal/>}
+            {isResultModalOpened &&
+                <ResultModal totalTargetCount={totalTargetCount} clickedTargetCount={clickedTargetCount}
+                             onResultModalClose={onResultModalClose}/>}
+
         </div>
     );
 }

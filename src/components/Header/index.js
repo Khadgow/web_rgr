@@ -1,6 +1,6 @@
 import styles from './index.module.css'
 
-const Toolbar = ({isStarted, onFinish, onStart, disableTime}) => {
+const Header = ({isStarted, onFinish, onStart, disableTime}) => {
 
     return (
         <div className={styles.header}>
@@ -17,4 +17,4 @@ const Toolbar = ({isStarted, onFinish, onStart, disableTime}) => {
         </div>
     )
 }
-export default Toolbar
+export default Header

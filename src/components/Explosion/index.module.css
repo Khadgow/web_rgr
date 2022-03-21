@@ -1,0 +1,24 @@
+.explosion {
+    animation-duration: 3s;
+    animation-name: explosion;
+    display: none;
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes explosion {
+    from {
+        opacity: 1;
+        height: 10px;
+        width: 10px;
+        border: red 4px solid;
+    }
+    to {
+        opacity: 0;
+        height: 80px;
+        width: 80px;
+        border: red 1px solid;
+    }
+}
